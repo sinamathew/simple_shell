@@ -6,11 +6,11 @@ int main(void)
 	size_t n;
 	ssize_t read;
 
-	read = getline(&line, &n, stdin);
-	while(read != -1)
+	printf("$ ");
+	while((read = getline(&line, &n, stdin)) != -1)
 	{
+		printf("%s", line);
 		printf("$ ");
-		printf("%lu", read);
 	}
 
 	free(line);
