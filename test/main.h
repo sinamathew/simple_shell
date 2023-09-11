@@ -1,6 +1,11 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+/*---PREPROCCESSOR---*/
+#define MAX_WORDS 1024
+
+
+
 /*---LIBRARIES---*/
 #include <stdio.h>
 #include <unistd.h>
@@ -12,6 +17,8 @@
 
 
 /*---TYPEDEF---*/
+
+
 
 
 #endif /*MAIN_H*/
