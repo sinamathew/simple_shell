@@ -13,7 +13,7 @@
 #include <string.h>
 
 /*---PROTOTYPES---*/
-
+char **splitString(const char *str, int *word_count);
 
 
 /*---TYPEDEF---*/
