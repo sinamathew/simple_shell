@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-/*---PREPROCCESSOR---*/
+/*---MACROS---*/
 #define MAX_WORDS 1024
 
 
@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 /*---PROTOTYPES---*/
 char **splitString(const char *str, int *word_count);
