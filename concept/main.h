@@ -14,10 +14,11 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fcntl.h>
 
 /*---PROTOTYPES---*/
 char **splitString(const char *str, int *word_count);
-
+void check(char *file);
 
 /*---TYPEDEF---*/
 
