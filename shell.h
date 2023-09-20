@@ -16,8 +16,8 @@
 
 /*---PROTOTYPES---*/
 void display_prompt(void);
-int read_input(char *input, size_t size);
-int execute_command(const char *input);
+int read_input(char **input, size_t *size);
+int execute_command(char *input);
 
 
 #endif /* SHELL_H */
