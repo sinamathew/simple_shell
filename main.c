@@ -6,13 +6,12 @@
  */
 int main(void)
 {
-	char *input;
-	size_t input_size;
+	char input[MAX_INPUT_SIZE];
 
 	while (1)
 	{
 		display_prompt();
-		if (read_input(&input, &input_size) == -1)
+		if (read_input(input, MAX_INPUT_SIZE) == -1)
 		{
 			write(STDERR_FILENO, "Error: read_input\n", 18);
 			_exit(EXIT_FAILURE);
