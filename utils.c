@@ -20,34 +20,63 @@ void display_prompt(void)
  * @size: pointer to allocated memory for input
  * Return: -1 if fail, and 0 on success
  */
-int read_input(char **input, size_t *size)
+int read_input(char *input, size_t size)
 {
-	char *line = NULL;
+	char c;
 	ssize_t n;
-	*size = 0;
+	size_t i = 0;
 
-	do {
-		n = read(STDIN_FILENO, &line[*size], 1);
+	while (i < size - 1)
+	{
+		n = read(STDIN_FILENO, &c, 1);
 
 		if (n == -1)
-		{
-			free(line);
 			return (-1);
-		}
 
-		(*size)++;
-	} while (n > 0 && line[*size - 1] != '\n');
+		else if (n == 0 || c == '\n')
+			break;
 
-	if (*size == 1 && line[0] == '\n')
-	{
-		free(line);
-		return (-1);
+		input[i++] = c;
 	}
 
-	line[*size - 1] = '\0';
-	*input = line;
+	input[i] = '\0';
 
 	return (0);
+}
+
+
+/**
+ * newline - look out for "\n" character
+ * @str: pointer to the string
+ * Return: i
+ * By: Sina
+ */
+size_t newline(const char *str)
+{
+	size_t i = 0;
+
+	while (str[i] != '\0' && str[i] != '\n')
+	{
+		i++;
+	}
+	return (i);
+}
+
+/**
+ * null_terminate - look out for "\0" character
+ * @str: pointer to string
+ * Return: len
+ * By: Sina
+ */
+size_t null_terminate(const char *str)
+{
+	size_t len = 0;
+
+	while (str[len] != '\0')
+	{
+		len++;
+	}
+	return (len);
 }
 
 
@@ -60,24 +89,28 @@ int read_input(char **input, size_t *size)
 int execute_command(char *input)
 {
 	pid_t pid = fork();
-	int status;
-	char not_found[] = "Command not found: ";
-	char new_line[] = "\n";
-	char *args[2];
-	char error_msg[] = "Error: execve\n";
-	args[0] = input;
-	args[1] = NULL;
+	int status, argc = 0;
+	char nfound[] = "Command not found: ";
+	char *args[MAX_ARGUMENTS];
+	char emsg[] = "Error: execve\n";
+	char *token = strtok(input, " ");
 
 	if (pid == -1)
-	{
-		write(STDERR_FILENO, "Error: fork\n", 12);
 		return (-1);
-	}
 
-	if (pid == 0 && execve(input, args, NULL) == -1)
+	if (pid == 0)
 	{
-		write(STDERR_FILENO, error_msg, sizeof(error_msg) - 1);
-		_exit(EXIT_FAILURE);
+		while (token != NULL && argc < MAX_ARGUMENTS - 1)
+		{
+			args[argc++] = token;
+			token = strtok(NULL, " ");
+		}
+		args[argc] = NULL;
+		if (execve(args[0], args, NULL) == -1)
+		{
+			write(STDERR_FILENO, emsg, sizeof(emsg) - 1);
+			_exit(EXIT_FAILURE);
+		}
 	}
 
 	else
@@ -85,9 +118,9 @@ int execute_command(char *input)
 		waitpid(pid, &status, 0);
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 		{
-			write(STDERR_FILENO, not_found, sizeof(not_found) - 1);
-			write(STDERR_FILENO, input, sizeof(input) - 1);
-			write(STDERR_FILENO, new_line, sizeof(new_line) - 1);
+			write(STDERR_FILENO, nfound, sizeof(nfound) - 1);
+			write(STDERR_FILENO, input, newline(input));
+			write(STDERR_FILENO, "\n", 1);
 		}
 	}
 	return (0);
