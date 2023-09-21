@@ -7,6 +7,7 @@
 void display_prompt(void)
 {
 	char prompt[] = "$ ";
+
 	write(STDOUT_FILENO, prompt, sizeof(prompt) - 1);
 }
 
@@ -19,16 +20,16 @@ int execute_command(char *input)
 {
 	pid_t pid;
 	char **args = parse_input(input);
+
 	if (args == NULL)
-	{
-		return -1;
-	}
-	 pid = fork();
+	return (-1);
+
+	pid = fork();
 	if (pid == -1)
 	{
 		perror("fork");
 		free_args(args);
-		return -1;
+		return (-1);
 	}
 	if (pid == 0)
 	{
@@ -38,15 +39,16 @@ int execute_command(char *input)
 			free_args(args);
 			_exit(EXIT_FAILURE);
 		}
-	} 
-	else 
+	}
+	else
 	{
 		int status;
+
 		if (waitpid(pid, &status, 0) == -1)
 		{
 			perror("waitpid");
 			free_args(args);
-			return -1;
+			return (-1);
 		}
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 		{
@@ -54,6 +56,5 @@ int execute_command(char *input)
 		}
 		free_args(args);
 	}
-	return 0;
+	return (0);
 }
-

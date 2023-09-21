@@ -4,11 +4,12 @@
 /**
  * main - a simple shell
  * By: Noble & Sina
- * Return 0
+ * Return: 0 for success
  */
 int main(void)
 {
 	char input[MAX_INPUT_SIZE];
+
 	while (1)
 	{
 		display_prompt();
