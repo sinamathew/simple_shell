@@ -1,27 +1,27 @@
 #include "shell.h"
-#include "utils.h"
 
 /**
- * main - a simple shell
- * By: Noble & Sina
- * Return: 0 for success
+ * main - Entry point for the simple shell
+ * By: Noble && Sina
+ * Return: Always 0
  */
 int main(void)
 {
-	char input[MAX_INPUT_SIZE];
+	char *command;
+	int status;
 
 	while (1)
 	{
-		display_prompt();
-		if (read_input(input) == -1)
-		{
-			write(STDERR_FILENO, "Error: read_input\n", 18);
-			_exit(EXIT_FAILURE);
-		}
-		if (execute_command(input) == -1)
-		{
-			write(STDERR_FILENO, "Error: shell\n", 13);
-		}
+		write(STDOUT_FILENO, "$ ", 2);
+		command = read_input();
+		if (command == NULL)
+			break;
+		status = execute_command(command);
+		free(command);
+		if (status == -1)
+			handle_error("Error executing command\n");
+		else if (status == 127)
+			command_not_found(command);
 	}
 	return (0);
 }
