@@ -1,94 +1,87 @@
 #include "shell.h"
 
 /**
- * is_cmd - checks if a string is a valid command
- * @info: Structure containing potential arguments. Used to maintain
- * constant function prototype.
- * @s: string to be evaluated
+ * is_cmd - determines if a file is an executable command
+ * By: Noble && Sina
+ * @info: the info struct
+ * @path: path to the file
  *
- * Return: 1 if s is a command, 0 otherwise
+ * Return: 1 if true, 0 otherwise
  */
-int is_cmd(info_t *info, char *s)
+int is_cmd(info_t *info, char *path)
 {
-	if (access(s, X_OK) == 0)
+	struct stat st;
+
+	(void)info;
+	if (!path || stat(path, &st))
+		return (0);
+
+	if (st.st_mode & S_IFREG)
 	{
-		info->path = s;
 		return (1);
 	}
 	return (0);
 }
 
 /**
- * dup_chars - duplicates a segment of a string
- * @s: the string to be duplicated
- * @i: the index at which to start duplication
- * @j: the index at which to stop duplication
+ * dup_chars - duplicates characters
+ * @pathstr: the PATH string
+ * @start: starting index
+ * @stop: stopping index
  *
- * Return: pointer to duplicated string
+ * Return: pointer to new buffer
  */
-char *dup_chars(char *s, int i, int j)
+char *dup_chars(char *pathstr, int start, int stop)
 {
-	char *str;
-	int k, len = j - i + 1;
+	static char buf[1024];
+	int i = 0, k = 0;
 
-	if (s == NULL)
-		return (NULL);
-
-	str = malloc(len + 1);
-	if (str == NULL)
-		return (NULL);
-
-	for (k = 0; i <= j; i++, k++)
-		str[k] = s[i];
-
-	str[k] = '\0';
-	return (str);
+	for (k = 0, i = start; i < stop; i++)
+		if (pathstr[i] != ':')
+			buf[k++] = pathstr[i];
+	buf[k] = 0;
+	return (buf);
 }
 
 /**
- * find_path - finds PATH variable and evaluates if s is in path
- * @info: Structure containing potential arguments. Used to maintain
- * constant function prototype.
- * @s: string to be evaluated
- * @path: path variable
+ * find_path - finds this cmd in the PATH string
+ * @info: the info struct
+ * @pathstr: the PATH string
+ * @cmd: the cmd to find
  *
- * Return: pointer to matching PATH string or NULL
+ * Return: full path of cmd if found or NULL
  */
-char *find_path(info_t *info, char *s, char *path)
+char *find_path(info_t *info, char *pathstr, char *cmd)
 {
-	char *dir, *tmp;
-	struct stat sb;
-	int len = 0;
+	int i = 0, curr_pos = 0;
+	char *path;
 
-	if (s[0] == '/')
-	{
-		if (stat(s, &sb) == 0)
-		{
-			if (S_ISREG(sb.st_mode) && sb.st_mode & S_IXUSR)
-			{
-				info->path = s;
-				return (s);
-			}
-		}
+	if (!pathstr)
 		return (NULL);
-	}
-	while (path[len] != '\0')
+	if ((_strlen(cmd) > 2) && starts_with(cmd, "./"))
 	{
-		dir = dup_chars(path, len, len);
-		tmp = _strcat(dir, "/");
-		tmp = _strcat(tmp, s);
-
-		if (stat(tmp, &sb) == 0)
+		if (is_cmd(info, cmd))
+			return (cmd);
+	}
+	while (1)
+	{
+		if (!pathstr[i] || pathstr[i] == ':')
 		{
-			if (S_ISREG(sb.st_mode) && sb.st_mode & S_IXUSR)
+			path = dup_chars(pathstr, curr_pos, i);
+			if (!*path)
+				_strcat(path, cmd);
+			else
 			{
-				free(dir);
-				info->path = tmp;
-				return (tmp);
+				_strcat(path, "/");
+				_strcat(path, cmd);
 			}
+			if (is_cmd(info, path))
+				return (path);
+			if (!pathstr[i])
+				break;
+			curr_pos = i;
 		}
-		free(dir);
-		len++;
+		i++;
 	}
 	return (NULL);
 }

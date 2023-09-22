@@ -1,67 +1,95 @@
 #include "shell.h"
 
 /**
- * custom_strtok - custom implementation of strtok
- * @str: the string to tokenize
- * @delim: the delimiter characters
- *
- * Return: an array of pointers to the tokens
+ * **strtow - splits a string into words. Repeat delimiters are ignored
+ * By: Noble && Sina
+ * @str: the input string
+ * @d: the delimeter string
+ * Return: a pointer to an array of strings, or NULL on failure
  */
-char **custom_strtok(char *str, const char *delim)
+
+char **strtow(char *str, char *d)
 {
-	char *token;
-	char **tokens = NULL;
-	size_t token_count = 0;
-	size_t tokens_size = 10;
+	int i, j, k, m, numwords = 0;
+	char **s;
 
-	if (!str)
+	if (str == NULL || str[0] == 0)
 		return (NULL);
+	if (!d)
+		d = " ";
+	for (i = 0; str[i] != '\0'; i++)
+		if (!is_delim(str[i], d) && (is_delim(str[i + 1], d) || !str[i + 1]))
+			numwords++;
 
-	tokens = malloc(tokens_size * sizeof(char *));
-	if (!tokens)
+	if (numwords == 0)
 		return (NULL);
-
-	token = strtok(str, delim);
-	while (token)
+	s = malloc((1 + numwords) * sizeof(char *));
+	if (!s)
+		return (NULL);
+	for (i = 0, j = 0; j < numwords; j++)
 	{
-		tokens[token_count] = custom_strdup(token);
-		if (!tokens[token_count])
+		while (is_delim(str[i], d))
+			i++;
+		k = 0;
+		while (!is_delim(str[i + k], d) && str[i + k])
+			k++;
+		s[j] = malloc((k + 1) * sizeof(char));
+		if (!s[j])
 		{
-			custom_free_tokens(tokens);
+			for (k = 0; k < j; k++)
+				free(s[k]);
+			free(s);
 			return (NULL);
 		}
-		token_count++;
-
-		if (token_count >= tokens_size)
-		{
-			tokens_size += 10;
-			tokens = custom_realloc(tokens, tokens_size * sizeof(char *));
-			if (!tokens)
-			{
-				custom_free_tokens(tokens);
-				return (NULL);
-			}
-		}
-		token = strtok(NULL, delim);
+		for (m = 0; m < k; m++)
+			s[j][m] = str[i++];
+		s[j][m] = 0;
 	}
-	tokens[token_count] = NULL;
-	return (tokens);
+	s[j] = NULL;
+	return (s);
 }
 
 /**
- * custom_free_tokens - frees an array of token strings
- * @tokens: the array of tokens to free
+ * **strtow2 - splits a string into words
+ * @str: the input string
+ * @d: the delimeter
+ * Return: a pointer to an array of strings, or NULL on failure
  */
-void custom_free_tokens(char **tokens)
+char **strtow2(char *str, char d)
 {
-	size_t i;
+	int i, j, k, m, numwords = 0;
+	char **s;
 
-	if (!tokens)
-		return;
-
-	for (i = 0; tokens[i] != NULL; i++)
+	if (str == NULL || str[0] == 0)
+		return (NULL);
+	for (i = 0; str[i] != '\0'; i++)
+		if ((str[i] != d && str[i + 1] == d) ||
+				    (str[i] != d && !str[i + 1]) || str[i + 1] == d)
+			numwords++;
+	if (numwords == 0)
+		return (NULL);
+	s = malloc((1 + numwords) * sizeof(char *));
+	if (!s)
+		return (NULL);
+	for (i = 0, j = 0; j < numwords; j++)
 	{
-		custom_free(tokens[i]);
+		while (str[i] == d && str[i] != d)
+			i++;
+		k = 0;
+		while (str[i + k] != d && str[i + k] && str[i + k] != d)
+			k++;
+		s[j] = malloc((k + 1) * sizeof(char));
+		if (!s[j])
+		{
+			for (k = 0; k < j; k++)
+				free(s[k]);
+			free(s);
+			return (NULL);
+		}
+		for (m = 0; m < k; m++)
+			s[j][m] = str[i++];
+		s[j][m] = 0;
 	}
-	custom_free(tokens);
+	s[j] = NULL;
+	return (s);
 }

@@ -1,27 +1,74 @@
 #include "shell.h"
 
 /**
- * custom_getinfo - Initializes an info_t structure with default values
- * By: Noble && Sina
- * @info: Pointer to the info_t structure to initialize
- * @av: The argument vector
- *
- * Return: No return value
+ * clear_info - initializes info_t struct
+ * By Noble && Sina
+ * @info: struct address
  */
-void custom_getinfo(info_t *info, char **av)
+void clear_info(info_t *info)
 {
-	if (!info)
-		return;
+	info->arg = NULL;
+	info->argv = NULL;
+	info->path = NULL;
+	info->argc = 0;
+}
 
-	info->av = av;
-	info->alias_list = NULL;
-	info->history_list = NULL;
-	info->line = NULL;
-	info->env = NULL;
-	info->readfd = STDIN_FILENO;
-	info->history_count = 0;
-	info->alias_count = 0;
-	info->status = 0;
-	info->err_num = 0;
-	info->cmds = NULL;
+/**
+ * set_info - initializes info_t struct
+ * @info: struct address
+ * @av: argument vector
+ */
+void set_info(info_t *info, char **av)
+{
+	int i = 0;
+
+	info->fname = av[0];
+	if (info->arg)
+	{
+		info->argv = strtow(info->arg, " \t");
+		if (!info->argv)
+		{
+			info->argv = malloc(sizeof(char *) * 2);
+			if (info->argv)
+			{
+				info->argv[0] = _strdup(info->arg);
+				info->argv[1] = NULL;
+			}
+		}
+		for (i = 0; info->argv && info->argv[i]; i++)
+			;
+		info->argc = i;
+
+		replace_alias(info);
+		replace_vars(info);
+	}
+}
+
+/**
+ * free_info - frees info_t struct fields
+ * @info: struct address
+ * @all: true if freeing all fields
+ */
+void free_info(info_t *info, int all)
+{
+	ffree(info->argv);
+	info->argv = NULL;
+	info->path = NULL;
+	if (all)
+	{
+		if (!info->cmd_buf)
+			free(info->arg);
+		if (info->env)
+			free_list(&(info->env));
+		if (info->history)
+			free_list(&(info->history));
+		if (info->alias)
+			free_list(&(info->alias));
+		ffree(info->environ);
+			info->environ = NULL;
+		bfree((void **)info->cmd_buf);
+		if (info->readfd > 2)
+			close(info->readfd);
+		_putchar(BUF_FLUSH);
+	}
 }
