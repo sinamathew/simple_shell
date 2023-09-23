@@ -2,16 +2,16 @@
 
 /**
  * main - Simple Shell main function
- * @ac: Count of arguments
- * @av: Arguments
+ * @argc: Count of arguments
+ * @argv: Arguments
  * Return: 0 Always (success).
  */
-int main(int ac, char **argv)
+int main(int argc, char **argv)
 {
 	char *line = NULL;
 	char **command = NULL;
 	int status = 0, idx = 0;
-	(void) ac;
+	(void) argc;
 
 	while (1)
 	{
